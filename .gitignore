@@ -6,3 +6,4 @@ __pycache__/git add .gitignore
 .ipynb_checkpoints/
 *.csv
 *.xlsx
+*.pbix
