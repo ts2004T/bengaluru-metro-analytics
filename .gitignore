@@ -1,9 +1,9 @@
 venv/
 .venv/
 __pycache__/git add .gitignore
-
 *.pyc
 .ipynb_checkpoints/
 *.csv
 *.xlsx
 *.pbix
+.env
