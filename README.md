@@ -58,24 +58,27 @@ This project answers five key operational questions:
 ---
 
 ## Project Architecture
+
+```text
 bengaluru-metro-analytics/
 ├── data/
-│   ├── raw/                    # Original BMRCL source files
-│   └── processed/              # Cleaned data + Power BI export
+│   ├── raw/                      # Original BMRCL source files
+│   └── processed/                # Cleaned datasets and Power BI export
 ├── notebooks/
-│   ├── 01_data_cleaning.ipynb  # ETL pipeline + PostgreSQL ingestion
-│   ├── 02_eda.ipynb            # Exploratory analysis + 7 visualisations
-│   └── 03_forecasting.ipynb    # Prophet model + 30-day forecast
+│   ├── 01_data_cleaning.ipynb   # ETL and PostgreSQL ingestion
+│   ├── 02_eda.ipynb             # EDA and visual analysis
+│   └── 03_forecasting.ipynb     # Prophet forecasting model
 ├── sql/
-│   ├── 01_data_validation.sql  # Quality checks
-│   ├── 02_station_kpis.sql     # Station performance metrics
-│   ├── 03_time_analysis.sql    # Temporal patterns
-│   └── 04_advanced_analytics.sql # Window functions + anomaly detection
-├── reports/                    # All charts + dashboard screenshots
+│   ├── 01_data_validation.sql   # Data quality checks
+│   ├── 02_station_kpis.sql      # Station performance metrics
+│   ├── 03_time_analysis.sql     # Time-based insights
+│   └── 04_advanced_analytics.sql # Window functions and anomaly detection
+├── reports/                     # Charts, screenshots, and dashboard assets
 ├── docs/
-│   ├── project_log.md          # Phase-by-phase documentation
-│   └── business_recommendations.md  # 5 actionable insights
-└── requirements.txt
+│   ├── project_log.md           # Phase-by-phase project notes
+│   └── business_recommendations.md  # Actionable recommendations
+└── requirements.txt             # Python dependencies
+```
 
 ---
 
@@ -132,9 +135,10 @@ cp .env.example .env
 ```
 
 **5. Run notebooks in order**
-notebooks/01_data_cleaning.ipynb
-notebooks/02_eda.ipynb
-notebooks/03_forecasting.ipynb
+
+1. `notebooks/01_data_cleaning.ipynb`
+2. `notebooks/02_eda.ipynb`
+3. `notebooks/03_forecasting.ipynb`
 
 ---
 
