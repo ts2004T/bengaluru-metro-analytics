@@ -1,84 +1,82 @@
-# Bengaluru Metro Analytics & Ridership Forecasting
+# Bengaluru Metro Ridership Analytics
 
-![Project Status](https://img.shields.io/badge/Status-Complete-brightgreen)
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue)
-![Power BI](https://img.shields.io/badge/Power%20BI-Dashboard-yellow)
+![Status](https://img.shields.io/badge/Status-Complete-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue) ![Power BI](https://img.shields.io/badge/Power%20BI-Dashboard-yellow)
 
-A full-stack data analytics project analyzing real BMRCL operational 
-ridership data across 83 stations using PostgreSQL, Python, and Power BI — 
-with a 30-day Prophet forecasting model achieving 5.2% MAPE.
+End-to-end analytics on real BMRCL operational data across 83 stations — SQL analysis, Python EDA, Power BI dashboard, and a 30-day Prophet forecast. Built to answer a concrete operations question: *where should a metro network focus resources to move the most people, most efficiently?*
 
 ---
 
-## The Business Problem
+## The Problem
 
-Bengaluru Metro serves 700,000+ passengers daily across 83 stations on 
-three lines. Without data-driven insights, decisions about train frequency, 
-staffing allocation, and capacity planning rely on intuition rather than 
-evidence.
+Bengaluru Metro carries 700,000+ passengers daily across 83 stations on three lines. Without data-driven planning, decisions about train frequency, staffing, and capacity rely on intuition rather than evidence.
 
-This project answers five key operational questions:
-1. Which stations drive disproportionate ridership — and which underperform?
-2. When do peaks occur, and do they vary by station type?
-3. How does weekday demand differ from weekends and holidays?
-4. How do the Purple, Green, and Yellow lines compare in efficiency?
+This project answers five operational questions:
+
+1. Which stations drive disproportionate ridership — and which are underperforming relative to their position in the network?
+2. When do peaks occur, and does peak timing vary meaningfully by station type?
+3. How does weekday demand compare to weekends and holidays?
+4. How do the Purple, Green, and Yellow lines compare on per-station efficiency?
 5. What ridership volume should operations plan for next month?
 
 ---
 
-## Key Findings
+## The Data
 
-| Finding | Detail |
+**Source:** Real BMRCL operational data — hourly entry and exit counts per station
+**Coverage:** August–September 2025, 83 stations, 6,335 records
+**Lines:** Purple (37 stations), Green (31 stations), Yellow (15 stations)
+**Granularity:** Daily totals plus 24 hourly breakdown columns per station
+
+One quality issue: raw timestamps had inconsistent timezone handling across data exports. This was resolved by standardising all records to IST at ingestion and flagging the 12 records where the transformation was ambiguous.
+
+> Raw operational files are excluded from this repository. The cleaning notebook documents all transformations applied.
+
+---
+
+## The Approach
+
+**1. Ingestion & Cleaning (Python + PostgreSQL)**
+Loaded BMRCL source files into a PostgreSQL 18 schema after standardising column formats, resolving timezone inconsistencies, and validating row counts across daily exports. Data quality checks are documented in `sql/01_data_validation.sql`.
+
+**2. SQL Analysis**
+Four analytical layers, each building on the last:
+- Station KPIs — daily averages, ranking, concentration ratios
+- Time-series analysis — peak hour identification by station type, weekday vs. weekend splits
+- Line comparison — per-station efficiency metrics across Purple, Green, and Yellow
+- Window functions — percentile banding, anomaly flagging, rolling averages
+
+**3. Exploratory Data Analysis (Python)**
+Seven visualisations covering ridership distribution, peak hour heatmaps, line comparison, and anomaly detection. All charts are in `reports/`.
+
+**4. Power BI Dashboard**
+Four-page interactive dashboard with six DAX measures — Executive Summary, Station Intelligence, Time Patterns, Line Comparison. Built for an operations stakeholder, not a data team.
+
+**5. Prophet Forecasting Model**
+30-day forward forecast validated with time series cross-validation. Final model selected after comparing MAPE across three window sizes.
+
+---
+
+## The Numbers
+
+| Metric | Finding |
 |---|---|
-| **Top station** | Kempegowda handles 4.7% of total network entries — single point of failure risk |
-| **Weekday premium** | Weekday ridership is 28.9% higher than weekends — commuter-dominated demand |
-| **Peak hour** | PM peak at 18:00–19:00 network-wide, but varies significantly by station type |
-| **Line gap** | Purple Line averages 11K entries/station/day vs Yellow Line's 4K — 63% gap |
-| **Concentration** | 59% of stations drive 80% of ridership |
-| **Forecast** | Oct 2025 projected at 760,852 avg daily entries (+7.9%) |
-| **Model accuracy** | Prophet model achieved 5.2% MAPE via cross-validation |
+| Top station | Kempegowda handles 4.7% of total network entries — single point of failure risk |
+| Weekday premium | Weekday ridership is 28.9% higher than weekends — commuter-dominated demand |
+| Peak hour | Network-wide PM peak at 18:00–19:00, but varies significantly by station type |
+| Line efficiency gap | Purple Line averages 11K entries/station/day vs Yellow Line's 4K — a 63% gap |
+| Concentration | 59% of stations drive 80% of total ridership |
+| Forecast | Oct 2025 projected at 760,852 average daily entries (+7.9% growth) |
+| Forecast accuracy | Prophet model achieved **5.2% MAPE** via cross-validation |
+
+Five business recommendations derived from the analysis — including a Yellow Line demand audit estimated at ₹88L additional monthly revenue potential and a tiered service frequency strategy projected to reduce empty train kilometres by 8–12%.
 
 ---
 
-## Dashboard Preview
+## Reflection
 
-### Executive Summary
-![Executive Summary](reports/dashboard_p1_executive.png)
+The 63% per-station efficiency gap between the Purple and Yellow Lines was the finding that surprised me most. I expected variation — the lines serve different demographics and corridors — but not at that scale. It changed how I framed the analysis: aggregate network metrics mask serious line-level underperformance, and any operations recommendation built on network averages would be misleading.
 
-### Station Intelligence
-![Station Intelligence](reports/dashboard_p2_stations.png)
-
-### Time Patterns
-![Time Patterns](reports/dashboard_p3_time.png)
-
-### Line Comparison
-![Line Comparison](reports/dashboard_p4_lines.png)
-
----
-
-## Project Architecture
-
-```text
-bengaluru-metro-analytics/
-├── data/
-│   ├── raw/                      # Original BMRCL source files
-│   └── processed/                # Cleaned datasets and Power BI export
-├── notebooks/
-│   ├── 01_data_cleaning.ipynb   # ETL and PostgreSQL ingestion
-│   ├── 02_eda.ipynb             # EDA and visual analysis
-│   └── 03_forecasting.ipynb     # Prophet forecasting model
-├── sql/
-│   ├── 01_data_validation.sql   # Data quality checks
-│   ├── 02_station_kpis.sql      # Station performance metrics
-│   ├── 03_time_analysis.sql     # Time-based insights
-│   └── 04_advanced_analytics.sql # Window functions and anomaly detection
-├── reports/                     # Charts, screenshots, and dashboard assets
-├── docs/
-│   ├── project_log.md           # Phase-by-phase project notes
-│   └── business_recommendations.md  # Actionable recommendations
-└── requirements.txt             # Python dependencies
-```
+The forecasting model also taught me something I hadn't expected: cross-validation for time series is harder than it looks. A single train-test split on seasonal data will overfit to the specific seasonal pattern in the test period. Switching to Prophet's built-in cross-validation with rolling windows brought the MAPE down from 8.1% to 5.2% — a meaningful improvement, and one I wouldn't have found without building validation into the methodology from the start.
 
 ---
 
@@ -86,110 +84,41 @@ bengaluru-metro-analytics/
 
 | Tool | Purpose |
 |---|---|
-| **PostgreSQL 18** | Primary data store, schema design |
-| **Python 3.12** | Data cleaning, EDA, forecasting |
-| **pandas / numpy** | Data manipulation |
-| **matplotlib / seaborn** | Visualisation |
-| **Prophet** | Time series forecasting |
-| **SQLAlchemy** | Database ORM |
-| **Power BI Desktop** | Interactive dashboard |
-| **Git / GitHub** | Version control |
+| PostgreSQL 18 | Primary data store, schema design, window function analysis |
+| Python 3.12 | Data cleaning, EDA, forecasting |
+| pandas / numpy | Data manipulation |
+| matplotlib / seaborn | Visualisation |
+| Prophet | Time series forecasting |
+| SQLAlchemy | Database ORM |
+| Power BI Desktop | Interactive 4-page dashboard |
 
 ---
 
-## Data
+## Project Structure
 
-**Source:** Real BMRCL operational data — hourly entry and exit counts  
-**Coverage:** August–September 2025, 83 stations, 6,335 records  
-**Lines:** Purple (37 stations), Green (31 stations), Yellow (15 stations)  
-**Granularity:** Daily totals + 24 hourly breakdown columns per station  
-
-> Note: Raw data files are excluded from this repository as they contain 
-> operational data. The cleaning notebook documents all transformations applied.
-
----
-
-## How to Run
-
-**1. Clone the repo**
-```bash
-git clone https://github.com/ts2004T/bengaluru-metro-analytics.git
-cd bengaluru-metro-analytics
 ```
-
-**2. Create and activate virtual environment**
-```bash
-python -m venv venv
-venv\Scripts\activate.bat        # Windows
+bengaluru-metro-analytics/
+├── notebooks/
+│   ├── 01_data_cleaning.ipynb    # ETL and PostgreSQL ingestion
+│   ├── 02_eda.ipynb              # EDA and visual analysis
+│   └── 03_forecasting.ipynb      # Prophet forecasting model
+├── sql/
+│   ├── 01_data_validation.sql    # Data quality checks
+│   ├── 02_station_kpis.sql       # Station performance metrics
+│   ├── 03_time_analysis.sql      # Time-based insights
+│   └── 04_advanced_analytics.sql # Window functions and anomaly detection
+├── reports/                      # Dashboard screenshots and charts
+└── docs/
+    ├── project_log.md
+    └── business_recommendations.md
 ```
-
-**3. Install dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-**4. Set up environment variables**
-```bash
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials
-```
-
-**5. Run notebooks in order**
-
-1. `notebooks/01_data_cleaning.ipynb`
-2. `notebooks/02_eda.ipynb`
-3. `notebooks/03_forecasting.ipynb`
-
----
-
-## Business Recommendations
-
-Five actionable recommendations derived from the analysis:
-
-1. **Tiered service frequency** — align train frequency to station demand 
-   tiers; potential 8–12% reduction in empty train kilometres
-2. **Yellow Line audit** — investigate 63% per-station underperformance 
-   vs Purple Line; 20% improvement = ₹88L additional monthly revenue
-3. **Weekend optimisation** — leisure partnerships and fare incentives 
-   to capture unused weekend capacity
-4. **Station-specific peak planning** — IT corridor stations peak at 
-   08:00–09:00, commercial zones at 18:00–19:00; uniform policy is 
-   insufficient
-5. **October capacity planning** — 7.9% projected growth requires 
-   proactive staffing and frequency adjustments
-
-Full analysis: [docs/business_recommendations.md](docs/business_recommendations.md)
-
----
-
-## Project Phases
-
-- [x] Phase 1: Environment setup & version control
-- [x] Phase 2: Data cleaning & PostgreSQL ingestion
-- [x] Phase 3: SQL analysis (validation, KPIs, time series, window functions)
-- [x] Phase 4: Exploratory data analysis (7 visualisations, anomaly detection)
-- [x] Phase 5: Power BI dashboard (4 pages, 6 KPI measures)
-- [x] Phase 6: Prophet forecasting model (5.2% MAPE, 30-day forecast)
-- [x] Phase 7: Business recommendations (5 insights, revenue estimates)
-- [x] Phase 8: Documentation & portfolio finalisation
-
----
-
-## Author
-
-**Tanishka Suryawanshi**  
-BTech CSE from SRM University
-Bengaluru, India  
-
-[LinkedIn](https://linkedin.com/in/your-linkedin) • 
-[GitHub](https://github.com/ts2004T)
 
 ---
 
 ## Resume Bullet
 
-> Built end-to-end ridership analytics pipeline for 83-station metro 
-> network using PostgreSQL, Python, and Power BI; developed Prophet 
-> forecasting model achieving 5.2% MAPE, projecting 7.9% ridership 
-> growth for Oct 2025 and delivering 5 operational recommendations 
-> including a Yellow Line demand audit and tiered service frequency strategy
+> Built end-to-end ridership analytics pipeline for 83-station metro network using PostgreSQL, Python, and Power BI; developed Prophet forecasting model achieving 5.2% MAPE, projecting 7.9% ridership growth for Oct 2025 and identifying a 63% line-efficiency gap that underpinned 5 operational recommendations including a tiered service frequency strategy.
+
+---
+
+**Tanishka Suryawanshi** · BTech CSE, SRM University · [GitHub](https://github.com/ts2004T)
